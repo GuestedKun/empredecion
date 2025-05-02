@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ahorrópolis - Juego Educativo Financiero (Estilo Monopoly)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #cbe2f0; /* Light blue background similar to Monopoly center */
+    }
+
+    /* Monopoly-like Board Styling */
+    .board-container {
+      max-width: 600px; /* Adjust as needed */
+      margin: 2rem auto;
+      padding: 10px;
+      background-color: #aae0aa; /* Monopoly board green */
+      border: 5px solid #388E3C; /* Darker green border */
+      border-radius: 10px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+
+    .board {
+      display: grid;
+      /* Define grid for a 6x6 board (adjust rows/cols for size) */
+      /* Top row, Right column, Bottom row, Left column */
+      grid-template-columns: 100px repeat(4, 1fr) 100px; /* Corner + 4 middle + Corner */
+      grid-template-rows: 100px repeat(4, 1fr) 100px;    /* Corner + 4 middle + Corner */
+      gap: 2px; /* Small gap between tiles */
+      aspect-ratio: 1 / 1; /* Keep it square */
+      position: relative; /* For player positioning */
+    }
+
+    .tile {
+      background-color: #f7f7f7; /* Light background for tiles */
+      border: 1px solid #ccc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      text-align: center;
+      padding: 5px;
+      position: relative; /* For player positioning */
+      overflow: hidden; /* Hide overflowing player icons */
+      min-height: 50px; /* Ensure minimum height */
+    }
+
+     /* Player container inside tile */
+    .player-container {
+        position: absolute;
+        inset: 0; /* Cover the tile */
+        display: flex; /* Use flexbox for positioning */
+        flex-wrap: wrap; /* Allow wrapping if many players */
+        align-items: center; /* Center vertically */
+        justify-content: center; /* Center horizontally */
+        pointer-events: none; /* Allow clicks to pass through to tile if needed */
+    }
+
+
+    /* Style corner tiles differently */
+    .corner {
+      font-weight: bold;
+      font-size: 12px;
+      background-color: #e0e0e0; /* Slightly different background for corners */
+    }
+
+    /* Style specific tiles (like Go, Jail, etc. if needed) */
+    .tile[data-tile-id="0"] { background-color: #ffdddd; } /* Start */
+    .tile[data-tile-id="5"] { background-color: #e0e0e0; } /* Jail */
+    .tile[data-tile-id="10"] { background-color: #e0e0e0; } /* Parking */
+    .tile[data-tile-id="15"] { background-color: #e0e0e0; } /* Go to Jail */
+
+
+    /* Assign tiles to grid areas */
+    /* Top Row */
+    .tile[data-tile-id="0"] { grid-column: 1 / 2; grid-row: 1 / 2; } /* Top-left corner */
+    .tile[data-tile-id="1"] { grid-column: 2 / 3; grid-row: 1 / 2; }
+    .tile[data-tile-id="2"] { grid-column: 3 / 4; grid-row: 1 / 2; }
+    .tile[data-tile-id="3"] { grid-column: 4 / 5; grid-row: 1 / 2; }
+    .tile[data-tile-id="4"] { grid-column: 5 / 6; grid-row: 1 / 2; }
+    .tile[data-tile-id="5"] { grid-column: 6 / 7; grid-row: 1 / 2; } /* Top-right corner */
+    /* Right Column */
+    .tile[data-tile-id="6"] { grid-column: 6 / 7; grid-row: 2 / 3; }
+    .tile[data-tile-id="7"] { grid-column: 6 / 7; grid-row: 3 / 4; }
+    .tile[data-tile-id="8"] { grid-column: 6 / 7; grid-row: 4 / 5; }
+    .tile[data-tile-id="9"] { grid-column: 6 / 7; grid-row: 5 / 6; }
+    .tile[data-tile-id="10"] { grid-column: 6 / 7; grid-row: 6 / 7; } /* Bottom-right corner */
+    /* Bottom Row (reversed order) */
+    .tile[data-tile-id="11"] { grid-column: 5 / 6; grid-row: 6 / 7; }
+    .tile[data-tile-id="12"] { grid-column: 4 / 5; grid-row: 6 / 7; }
+    .tile[data-tile-id="13"] { grid-column: 3 / 4; grid-row: 6 / 7; }
+    .tile[data-tile-id="14"] { grid-column: 2 / 3; grid-row: 6 / 7; }
+    .tile[data-tile-id="15"] { grid-column: 1 / 2; grid-row: 6 / 7; } /* Bottom-left corner */
+    /* Left Column (reversed order) */
+    .tile[data-tile-id="16"] { grid-column: 1 / 2; grid-row: 5 / 6; }
+    .tile[data-tile-id="17"] { grid-column: 1 / 2; grid-row: 4 / 5; }
+    .tile[data-tile-id="18"] { grid-column: 1 / 2; grid-row: 3 / 4; }
+    .tile[data-tile-id="19"] { grid-column: 1 / 2; grid-row: 2 / 3; }
+
+    /* Center Area */
+    .center-area {
+      grid-column: 2 / 6;
+      grid-row: 2 / 6;
+      background-color: #d4ebd4; /* Lighter green for center */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px dashed #388E3C;
+      border-radius: 5px;
+      padding: 10px;
+    }
+
+    /* Player Icons (Emojis) */
+    .player {
+      position: absolute; /* Positioned within the player-container */
+      font-size: 24px; /* Adjust emoji size */
+      transition: all 0.3s ease-in-out; /* Smoother animation for movement */
+      z-index: 5; /* Ensure players are above tiles */
+       width: 24px; /* Explicit width */
+       height: 24px; /* Explicit height */
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       pointer-events: auto; /* Allow interaction if needed later */
+    }
+
+    /* Stagger player positions within a tile using transform */
+    /* These transforms are relative to the center of the player-container */
+    .player[data-player-index="0"] { transform: translate(-10px, -10px); }
+    .player[data-player-index="1"] { transform: translate(10px, -10px); }
+    .player[data-player-index="2"] { transform: translate(-10px, 10px); }
+    .player[data-player-index="3"] { transform: translate(10px, 10px); }
+    /* Add more if needed */
+
+
+    /* Modal Styles (using Tailwind for simplicity now) */
+    .modal {
+      display: none; /* Hidden by default */
+    }
+    .modal.flex {
+        display: flex; /* Show modal */
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 640px) {
+      .board-container {
+        max-width: 95%;
+        margin: 1rem auto;
+      }
+      .board {
+        grid-template-columns: 60px repeat(4, 1fr) 60px;
+        grid-template-rows: 60px repeat(4, 1fr) 60px;
+        gap: 1px;
+      }
+      .tile {
+        font-size: 8px;
+        min-height: 40px;
+      }
+      .corner {
+         font-size: 10px;
+      }
+      .player {
+        font-size: 18px; /* Smaller emojis on small screens */
+         width: 18px;
+         height: 18px;
+      }
+       /* Adjust staggering for smaller size */
+       .player[data-player-index="0"] { transform: translate(-6px, -6px); }
+       .player[data-player-index="1"] { transform: translate(6px, -6px); }
+       .player[data-player-index="2"] { transform: translate(-6px, 6px); }
+       .player[data-player-index="3"] { transform: translate(6px, 6px); }
+
+        .center-area h2 { font-size: 1.1rem; } /* Adjust center text size */
+        .center-area #dice { font-size: 2rem; }
+        .center-area button { font-size: 0.9rem; padding: 6px 10px;}
+        .center-area #result { font-size: 0.9rem; }
+    }
+
+  </style>
+</head>
+<body class="bg-blue-100 text-gray-800">
+
+  <nav class="bg-green-700 p-3 text-white flex justify-center gap-5 shadow-md">
+    <a href="#" onclick="mostrarPestana('inicio')" class="hover:underline font-semibold">Inicio</a>
+    <a href="#" onclick="mostrarPestana('reglas')" class="hover:underline font-semibold">Reglas</a>
+    <a href="#" onclick="mostrarPestana('juego')" class="hover:underline font-semibold">Jugar</a>
+  </nav>
+
+  <header class="bg-green-600 p-5 text-center text-white shadow-lg">
+    <h1 class="text-3xl font-bold">Ahorrópolis</h1>
+  </header>
+
+  <main class="p-5">
+    <section id="pestana-inicio" class="bg-white p-5 rounded-lg shadow mb-6">
+      <h2 class="text-2xl font-semibold text-green-800 mb-3">Bienvenido a Ahorrópolis</h2>
+      <p>Un juego educativo para aprender finanzas personales mientras te diviertes.</p>
+      <p class="mt-2">¡Prepárate para tomar decisiones financieras inteligentes y alcanzar la meta!</p>
+    </section>
+
+    <section id="pestana-reglas" style="display:none;" class="bg-white p-5 rounded-lg shadow mb-6">
+      <h2 class="text-2xl font-semibold text-green-800 mb-3">Reglas del Juego</h2>
+      <ul class="list-disc list-inside space-y-1">
+        <li>Cada jugador empieza con $100 (¡un pequeño impulso inicial!).</li>
+        <li>Se avanza lanzando un dado (1-6).</li>
+        <li>El tablero tiene casillas de Ahorro (+), Gasto (-), Inversión (+), Retos (?), Sorpresas (+/-) e Impuestos (-).</li>
+        <li>Completa 2 vueltas al tablero para terminar.</li>
+        <li>Gana quien tenga más dinero al finalizar las 2 vueltas.</li>
+        <li>Responde correctamente a los retos para ganar dinero extra.</li>
+        <li>Si caes en "Ve a la Cárcel", vas directo a la casilla de Cárcel y pierdes tu siguiente turno (a menos que saques un 6 en el dado o pagues $50 después de 3 intentos).</li>
+      </ul>
+    </section>
+
+    <section id="pestana-juego" style="display:none;">
+      <div id="playerSetup" class="bg-white p-5 rounded-lg shadow mb-6 text-center">
+          <h3 class="text-xl font-semibold mb-3">Configuración de Jugadores</h3>
+          <div id="playerInputsContainer" class="mb-4">
+              <div class="flex items-center justify-center mb-2">
+                  <input type="text" class="playerNameInput border rounded px-3 py-2 mr-2 w-60 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nombre del Jugador 1">
+                  <span class="player-icon-selector text-2xl cursor-pointer p-1 bg-gray-200 rounded" onclick="selectIcon(this)">🚗</span>
+              </div>
+          </div>
+          <button onclick="addPlayerInput()" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mr-2 transition duration-150 ease-in-out">+</button>
+          <button id="startGame" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Iniciar Juego</button>
+      </div>
+
+      <div id="gameArea" style="display: none;">
+          <div class="board-container">
+              <div id="board" class="board">
+                  </div>
+          </div>
+
+          <div id="turnoActual" class="text-center mt-4 text-lg font-semibold"></div>
+          <div id="playersStatus" class="flex flex-wrap justify-center gap-4 mt-4">
+              </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-green-700 text-white text-center p-4 mt-10">
+    &copy; 2025 Ahorrópolis - Juego Financiero
+  </footer>
+
+  <div id="victoriaModal" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 items-center justify-center z-50">
+    <div class="modal-content bg-white p-6 rounded-lg shadow-xl text-center max-w-sm w-full">
+      <h2 class="text-2xl font-bold text-yellow-500 mb-4">🎉 ¡Felicidades! 🎉</h2>
+      <p id="mensajeVictoria" class="mb-5"></p>
+      <button onclick="location.reload()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Jugar de nuevo</button>
+    </div>
+  </div>
+
+  <div id="challengeModal" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 items-center justify-center z-50">
+    <div class="modal-content bg-white p-6 rounded-lg shadow-xl text-center max-w-md w-full">
+      <h2 class="text-xl font-semibold text-blue-700 mb-4">🎯 ¡Reto Financiero! 🎯</h2>
+      <p id="challengeQuestion" class="mb-5"></p>
+      <div id="challengeOptions" class="options space-y-3">
+          </div>
+    </div>
+  </div>
+
+  <div id="iconSelectorModal" class="modal fixed inset-0 bg-gray-800 bg-opacity-75 items-center justify-center z-50">
+        <div class="modal-content bg-white p-6 rounded-lg shadow-xl text-center max-w-md w-full">
+            <h2 class="text-xl font-semibold mb-4">Elige tu Icono</h2>
+            <div id="iconOptions" class="grid grid-cols-4 sm:grid-cols-6 gap-4 text-3xl">
+                </div>
+            <button onclick="closeIconSelector()" class="mt-5 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded transition duration-150 ease-in-out">Cerrar</button>
+        </div>
+    </div>
+
+
+  <script>
+    // --- DOM Elements ---
+    const boardDiv = document.getElementById("board");
+    // Use LET for elements that will be reassigned in renderBoard
+    let rollButton = document.getElementById("rollButton"); // Initial dummy assignment
+    let diceDiv = document.getElementById("dice");       // Initial dummy assignment
+    let resultDiv = document.getElementById("result");     // Initial dummy assignment
+    // Const for elements not reassigned
+    const playerInputsContainer = document.getElementById("playerInputsContainer");
+    const playersStatusDiv = document.getElementById("playersStatus");
+    const turnoActualDiv = document.getElementById("turnoActual");
+    const victoriaModal = document.getElementById("victoriaModal");
+    const mensajeVictoria = document.getElementById("mensajeVictoria");
+    const challengeModal = document.getElementById("challengeModal");
+    const questionEl = document.getElementById("challengeQuestion");
+    const optionsEl = document.getElementById("challengeOptions");
+    const playerSetupDiv = document.getElementById("playerSetup");
+    const gameAreaDiv = document.getElementById("gameArea");
+    const iconSelectorModal = document.getElementById("iconSelectorModal");
+    const iconOptionsDiv = document.getElementById("iconOptions");
+    const startButton = document.getElementById("startGame"); // This one is only assigned once
+
+
+    // --- Game State ---
+    let players = [];
+    let currentPlayerIndex = 0;
+    let diceLocked = false;
+    let currentIconTarget = null; // Element to set the icon for
+    const availableIcons = ['🚗', '🚀', '⛵', '🚲', '🚁', '🛸', '🚂', '🛵', '🚢', '🏎️', '🏍️', '🛴', '💰', '💎', '🎩', '🐶', '🐱', '🤖'];
+
+
+    // --- Board Definition (20 tiles for a 6x6 outer ring) ---
+    const tiles = [
+      { name: "Inicio / Cobrar", icon: "🏠", type: 'corner', effect: player => { player.money += 100; showMessage(`${player.name} pasó por Inicio y cobró $100`, 'info'); } }, // 0 (Corner)
+      { name: "Ahorro Fácil", icon: "💰", effect: player => { player.money += 50; showMessage(`${player.name} ahorró $50. ¡Bien!`, 'success'); } }, // 1
+      { name: "Reto", icon: "🎯", type: 'challenge', effect: player => triggerChallenge(player) }, // 2
+      { name: "Gasto Hormiga", icon: "💸", effect: player => { player.money -= 30; showMessage(`${player.name} tuvo un gasto hormiga de $30.`, 'warning'); } }, // 3
+      { name: "Impuesto Simple", icon: "💵", effect: player => { player.money -= 20; showMessage(`${player.name} pagó $20 de impuestos.`, 'warning'); } }, // 4
+      { name: "Cárcel (Visita)", icon: "👮", type: 'corner', effect: player => showMessage(`${player.name} está de visita en la Cárcel.`, 'info') }, // 5 (Corner)
+      { name: "Inversión Segura", icon: "📈", effect: player => { player.money += 70; showMessage(`${player.name} hizo una inversión segura y ganó $70.`, 'success'); } }, // 6
+      { name: "Sorpresa", icon: "🎁", type: 'surprise', effect: player => handleSurprise(player) }, // 7
+      { name: "Ahorro Programado", icon: "💰", effect: player => { player.money += 60; showMessage(`${player.name} cumplió su ahorro programado: +$60.`, 'success'); } }, // 8
+      { name: "Reto", icon: "🎯", type: 'challenge', effect: player => triggerChallenge(player) }, // 9
+      { name: "Parking Gratis", icon: "🅿️", type: 'corner', effect: player => showMessage(`${player.name} descansa en el Parking Gratis.`, 'info') }, // 10 (Corner)
+      { name: "Gasto Fuerte", icon: "🧾", effect: player => { player.money -= 100; showMessage(`${player.name} tuvo un gasto fuerte de $100.`, 'danger'); } }, // 11
+      { name: "Ahorro Extra", icon: "💰", effect: player => { player.money += 80; showMessage(`${player.name} logró un ahorro extra de $80.`, 'success'); } }, // 12
+      { name: "Impuesto Alto", icon: "💵", effect: player => { player.money -= 50; showMessage(`${player.name} pagó un impuesto alto de $50.`, 'warning'); } }, // 13
+      { name: "Reto", icon: "🎯", type: 'challenge', effect: player => triggerChallenge(player) }, // 14
+      { name: "Ve a la Cárcel", icon: "🚔", type: 'corner', effect: player => {
+          showMessage(`${player.name}, ¡directo a la Cárcel!`, 'danger');
+          player.position = 5; // Jail position index
+          player.isJailed = true;
+          player.turnsInJail = 0; // Reset jail turns counter
+          movePlayer(player, true); // Move pawn instantly to jail tile
+          // Next turn logic is handled after this effect completes in rollDice
+      } }, // 15 (Corner) - Teleports to tile 5
+      { name: "Inversión Arriesgada", icon: "📈", effect: player => { const gain = Math.random() > 0.4 ? 150 : -50; player.money += gain; showMessage(`${player.name} hizo una inversión arriesgada y ${gain > 0 ? 'ganó $' + gain : 'perdió $' + Math.abs(gain)}.`, gain > 0 ? 'success' : 'danger'); } }, // 16
+      { name: "Sorpresa", icon: "🎁", type: 'surprise', effect: player => handleSurprise(player) }, // 17
+      { name: "Gasto Inesperado", icon: "💸", effect: player => { player.money -= 75; showMessage(`${player.name} tuvo un gasto inesperado de $75.`, 'warning'); } }, // 18
+      { name: "Ahorro Final", icon: "💰", effect: player => { player.money += 100; showMessage(`${player.name} hizo un último gran ahorro de $100.`, 'success'); } }, // 19
+    ];
+    const totalTiles = tiles.length;
+    const jailPositionIndex = 5; // Explicitly define jail position index
+
+    // --- Functions ---
+
+    function mostrarPestana(id) {
+      // Hide all sections first
+      document.getElementById('pestana-inicio').style.display = 'none';
+      document.getElementById('pestana-reglas').style.display = 'none';
+      document.getElementById('pestana-juego').style.display = 'none';
+
+      // Show the selected section
+      const pestana = document.getElementById('pestana-' + id);
+      if (pestana) {
+          pestana.style.display = 'block';
+      }
+
+
+      // If switching to 'juego', ensure setup or game area is visible
+      if (id === 'juego') {
+          if (players.length === 0) { // If game hasn't started
+              playerSetupDiv.style.display = 'block';
+              gameAreaDiv.style.display = 'none';
+          } else { // If game is in progress
+              playerSetupDiv.style.display = 'none';
+              gameAreaDiv.style.display = 'block';
+          }
+      }
+    }
+
+    function selectIcon(element) {
+        currentIconTarget = element;
+        iconOptionsDiv.innerHTML = ''; // Clear previous options
+        availableIcons.forEach(icon => {
+            const iconSpan = document.createElement('span');
+            iconSpan.textContent = icon;
+            // Added padding and background for better click target
+            iconSpan.className = 'cursor-pointer hover:opacity-75 p-2 rounded bg-gray-100 hover:bg-gray-200';
+            iconSpan.onclick = () => {
+                if (currentIconTarget) {
+                    currentIconTarget.textContent = icon;
+                    currentIconTarget.classList.remove('bg-gray-200'); // Remove placeholder look
+                    currentIconTarget.classList.add('bg-green-100'); // Indicate selection
+                }
+                closeIconSelector();
+            };
+            iconOptionsDiv.appendChild(iconSpan);
+        });
+        iconSelectorModal.style.display = "flex";
+    }
+
+    function closeIconSelector() {
+        iconSelectorModal.style.display = "none";
+        currentIconTarget = null;
+    }
+
+
+    function addPlayerInput() {
+        const count = playerInputsContainer.children.length + 1;
+        if (count > 4) { // Limit players
+             showMessage("Máximo 4 jugadores.", "warning");
+             return;
+        }
+        const div = document.createElement('div');
+        div.className = 'flex items-center justify-center mb-2';
+        // Use one of the available icons as default, make selector obvious
+        const defaultIcon = availableIcons[count - 1] || '❓';
+        div.innerHTML = `
+            <input type="text" class="playerNameInput border rounded px-3 py-2 mr-2 w-60 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nombre del Jugador ${count}">
+            <span class="player-icon-selector text-2xl cursor-pointer p-1 bg-gray-200 rounded" onclick="selectIcon(this)">${defaultIcon}</span>
+        `;
+        playerInputsContainer.appendChild(div);
+    }
+
+
+    function renderBoard() {
+      boardDiv.innerHTML = ""; // Clear previous board content
+
+      // --- Create Center Area ---
+      const centerArea = document.createElement('div');
+      centerArea.className = 'center-area';
+      centerArea.innerHTML = `
+          <h2 class="text-xl font-bold text-green-800 mb-2">Ahorrópolis</h2>
+          <div id="dice-display" class="text-4xl mb-2">🎲</div>
+          <button id="roll-dice-button" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded shadow transition duration-150 ease-in-out mb-2" disabled>Lanzar dado</button>
+          <div id="roll-result-display" class="text-lg font-semibold min-h-[1.5em]"></div>
+      `;
+      boardDiv.appendChild(centerArea);
+
+      // --- Create Tiles ---
+      tiles.forEach((tile, i) => {
+        const div = document.createElement("div");
+        div.className = `tile ${tile.type === 'corner' ? 'corner' : ''}`;
+        div.dataset.tileId = i; // Store tile index
+        div.innerHTML = `
+            <div class="tile-icon text-2xl">${tile.icon}</div>
+            <div class="tile-name font-semibold">${tile.name}</div>
+            <div class="player-container"></div> `;
+        // Apply grid positioning styles directly (more robust than relying on CSS order)
+        const { col, row } = getGridPosition(i);
+        div.style.gridColumn = col;
+        div.style.gridRow = row;
+        boardDiv.appendChild(div);
+      });
+
+      // --- Update DOM Element References (using let variables) ---
+      diceDiv = document.getElementById('dice-display');
+      rollButton = document.getElementById('roll-dice-button');
+      resultDiv = document.getElementById('roll-result-display');
+
+      // --- Add Event Listener ---
+      // Ensure rollButton exists before adding listener
+      if (rollButton) {
+          rollButton.addEventListener('click', rollDice);
+          // Button should be enabled only when game starts and it's player's turn
+          rollButton.disabled = true;
+      } else {
+          console.error("Roll button not found after rendering board.");
+      }
+    }
+
+    // Helper function to get grid position based on tile index
+    function getGridPosition(index) {
+        const boardSize = 6; // 6x6 grid
+        const lastIndex = boardSize - 1;
+
+        if (index === 0) return { col: '1 / 2', row: '1 / 2' }; // Top-left
+        if (index > 0 && index < lastIndex) return { col: `${index + 1} / ${index + 2}`, row: '1 / 2' }; // Top row
+        if (index === lastIndex) return { col: `${boardSize} / ${boardSize + 1}`, row: '1 / 2' }; // Top-right
+        if (index > lastIndex && index < lastIndex * 2) return { col: `${boardSize} / ${boardSize + 1}`, row: `${index - lastIndex + 1} / ${index - lastIndex + 2}` }; // Right col
+        if (index === lastIndex * 2) return { col: `${boardSize} / ${boardSize + 1}`, row: `${boardSize} / ${boardSize + 1}` }; // Bottom-right
+        if (index > lastIndex * 2 && index < lastIndex * 3) return { col: `${boardSize - (index - lastIndex * 2)} / ${boardSize - (index - lastIndex * 2) + 1}`, row: `${boardSize} / ${boardSize + 1}` }; // Bottom row
+        if (index === lastIndex * 3) return { col: '1 / 2', row: `${boardSize} / ${boardSize + 1}` }; // Bottom-left
+        if (index > lastIndex * 3 && index < totalTiles) return { col: '1 / 2', row: `${boardSize - (index - lastIndex * 3)} / ${boardSize - (index - lastIndex * 3) + 1}` }; // Left col
+
+        // Fallback for safety, though should not be reached with correct totalTiles
+        return { col: '1 / 2', row: '1 / 2' };
+    }
+
+
+    function startGame() {
+      players = []; // Reset players
+      const inputDivs = playerInputsContainer.querySelectorAll("div.flex"); // More specific selector
+
+      inputDivs.forEach((div, i) => {
+          const input = div.querySelector(".playerNameInput");
+          const iconSpan = div.querySelector(".player-icon-selector");
+          const name = input ? input.value.trim() : '';
+          const icon = iconSpan ? iconSpan.textContent : '';
+          // Basic validation
+          if (name && icon && icon !== '❓') {
+              players.push({
+                  name,
+                  position: 0,
+                  money: 100, // Start with some money
+                  correct: 0,
+                  wrong: 0,
+                  pawn: null, // Will be created later
+                  icon: icon,
+                  laps: 0,
+                  isJailed: false,
+                  turnsInJail: 0,
+                  id: `player-${i}`
+              });
+          } else {
+              showMessage(`Jugador ${i+1} necesita un nombre y un icono válido.`, 'warning');
+          }
+      });
+
+      // Check if enough valid players were added
+      if (players.length < 1) {
+          showMessage("Agrega al menos un jugador válido para iniciar.", "warning");
+          return; // Stop if no valid players
+      }
+
+      playerSetupDiv.style.display = "none"; // Hide setup
+      renderBoard(); // Render the Monopoly-style board (this also updates rollButton reference)
+
+      // Create player pawns (emojis) and place them
+      players.forEach((player, i) => {
+          const pawn = document.createElement("div");
+          pawn.className = "player";
+          pawn.textContent = player.icon;
+          pawn.dataset.playerId = player.id;
+          pawn.dataset.playerIndex = i; // For staggering CSS
+          player.pawn = pawn; // Assign the created element to the player object
+          // Place initial pawn on the board (Tile 0)
+          movePlayer(player, true); // Move instantly on start
+      });
+
+      gameAreaDiv.style.display = "block"; // Show game area
+      currentPlayerIndex = 0;
+      diceLocked = false;
+      updateStatus();
+      showTurn(); // Includes enabling the roll button for the first player
+      mostrarPestana('juego'); // Ensure game tab is visible
+    }
+
+    function showTurn() {
+      if (!players || players.length === 0) return; // Guard against no players
+      const player = players[currentPlayerIndex];
+      if (!player) return; // Guard against invalid player index
+
+      turnoActualDiv.textContent = `Turno de: ${player.name} ${player.icon}`;
+      turnoActualDiv.style.color = getPlayerColor(currentPlayerIndex); // Add some color
+
+      // Enable roll button only for the current player if dice not locked
+      if (rollButton) {
+          rollButton.disabled = diceLocked || player.isJailed; // Disable if jailed too
+      }
+       // Clear previous roll result
+      if (resultDiv) {
+          resultDiv.textContent = '';
+      }
+       // Reset dice visual
+       if(diceDiv){
+           diceDiv.textContent = '🎲';
+       }
+    }
+
+    function getPlayerColor(index) {
+        const colors = ["#E53E3E", "#3182CE", "#38A169", "#DD6B20", "#5A67D8", "#805AD5"]; // Red, Blue, Green, Orange, Indigo, Purple
+        return colors[index % colors.length];
+    }
+
+
+    function rollDice() {
+      // Guards
+      if (diceLocked || !players.length) return;
+      let player = players[currentPlayerIndex];
+      if (!player) return;
+
+      diceLocked = true; // Lock dice immediately
+      rollButton.disabled = true; // Disable button visually
+
+      // --- Jail Logic ---
+      if (player.isJailed) {
+          player.turnsInJail++;
+          const roll = Math.floor(Math.random() * 6) + 1;
+          diceDiv.textContent = `🎲${roll}`; // Show dice roll
+          resultDiv.textContent = `En Cárcel (Intento ${player.turnsInJail}/3)`;
+
+          if (roll === 6) { // Roll a 6 to get out
+              player.isJailed = false;
+              player.turnsInJail = 0;
+              showMessage(`${player.name} sacó un 6 y salió de la cárcel! Lanza de nuevo.`, 'success');
+              // Player gets to roll again immediately after getting out with a 6
+              diceLocked = false;
+              rollButton.disabled = false;
+              return; // End this function call, player rolls again
+          } else if (player.turnsInJail >= 3) { // Max 3 turns in jail
+              player.isJailed = false;
+              player.turnsInJail = 0;
+              player.money -= 50; // Pay fine
+              showMessage(`${player.name} pagó $50 para salir de la cárcel.`, 'warning');
+              // Continue turn normally after paying (roll again for movement)
+              // Don't return here, proceed to normal roll below
+          } else {
+              showMessage(`${player.name} sigue en la cárcel. Necesita un 6 o esperar.`, 'info');
+              // Still in jail, turn ends
+              setTimeout(() => {
+                  nextTurn(); // Skip rest of the turn
+              }, 1500);
+              return; // End turn here if still jailed and didn't pay
+          }
+          // If player paid fine, fall through to normal roll
+      }
+      // --- End Jail Logic ---
+
+
+      const roll = Math.floor(Math.random() * 6) + 1;
+      diceDiv.textContent = `🎲${roll}`; // Show dice roll visually
+      resultDiv.textContent = `Avanzando ${roll} casillas...`;
+
+      let initialPosition = player.position;
+      // Animate movement step-by-step
+      let currentStep = player.position;
+      let stepsTaken = 0;
+      const targetPosition = (player.position + roll) % totalTiles; // Calculate final position
+
+
+      function stepAnimation() {
+          if (stepsTaken < roll) {
+              currentStep = (currentStep + 1) % totalTiles;
+              movePlayer(player, false, currentStep); // Move smoothly to next step
+              stepsTaken++;
+              // Short delay between steps for animation effect
+              setTimeout(stepAnimation, 250); // Adjust speed of steps (milliseconds)
+          } else {
+              // --- Final position reached ---
+              player.position = targetPosition;
+              // Ensure the pawn is visually in the final position
+              movePlayer(player, false, player.position);
+
+              // Check for passing GO (only if not landing exactly on GO)
+              if (player.position !== 0 && targetPosition < initialPosition) {
+                  player.laps++;
+                  showMessage(`${player.name} completó una vuelta!`, 'info');
+                  tiles[0].effect(player); // Trigger GO effect (tile 0)
+              }
+
+              // Trigger tile effect after animation completes
+              const tile = tiles[player.position];
+              resultDiv.textContent = `Cayó en: ${tile.name}`;
+              updateStatus(); // Update status before showing tile effect message
+
+              // Handle tile effect execution and turn progression
+              executeTileEffect(player, tile);
+          }
+      }
+      // Start the animation
+      stepAnimation();
+    }
+
+    // Separate function to handle tile effect and next turn logic
+    function executeTileEffect(player, tile) {
+        // Execute the tile's primary effect
+        if (tile.effect) {
+            tile.effect(player);
+        }
+
+        // Check if the effect itself handles the next turn (e.g., Challenge, Go to Jail)
+        if (tile.type === 'challenge') {
+            
+            updateStatus(); 
+        } else if (tile.name === "Ve a la Cárcel") {
+           
+             updateStatus();
+            setTimeout(() => {
+                nextTurn();
+            }, 1500);
+        } else {
+            
+             updateStatus();
+            setTimeout(() => {
+                nextTurn();
+            }, 1500); // Delay before allowing next roll
+        }
+    }
+
+
+    function movePlayer(player, instant = false, targetPos = player.position) {
+        if (!player || !player.pawn) {
+            console.error("MovePlayer Error: Invalid player or pawn object.", player);
+            return; // Prevent error if pawn doesn't exist
+        }
+
+        const targetTileIndex = targetPos;
+        // Target the specific player-container within the tile
+        const tileElement = boardDiv.querySelector(`.tile[data-tile-id="${targetTileIndex}"] .player-container`);
+
+        if (tileElement) {
+            // Apply/remove transition based on 'instant' flag
+            player.pawn.style.transition = instant ? 'none' : 'all 0.25s ease-in-out'; // Faster animation
+
+            
+            tileElement.appendChild(player.pawn);
+
+            // Force reflow/repaint might be needed for instant moves in some browsers
+            if (instant) {
+                 void player.pawn.offsetWidth; // Trigger reflow
+                
+            }
+        } else {
+            console.error(`MovePlayer Error: Tile element or player container not found for index: ${targetTileIndex}`);
+        }
+    }
+
+
+    function nextTurn() {
+        // Check if game should end (all players completed 2 laps)
+        const allFinished = players.every(p => p.laps >= 2);
+        if (allFinished) {
+            endGame();
+            return;
+        }
+
+        // Move to the next player
+        currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+
+        // Reset dice lock and update turn display/button state
+        diceLocked = false;
+        showTurn(); // This will update text and enable/disable roll button
+    }
+
+    function endGame() {
+        diceLocked = true; // Prevent further rolls
+        if(rollButton) rollButton.disabled = true;
+        const sortedPlayers = [...players].sort((a, b) => b.money - a.money);
+        const topPlayer = sortedPlayers[0];
+
+        let rankingText = sortedPlayers.map((p, index) =>
+            `${index + 1}. ${p.name} ${p.icon}: $${p.money} (${p.laps} vueltas)`
+        ).join('<br>'); // Use <br> for line breaks in HTML
+
+        mensajeVictoria.innerHTML = `<strong>¡Juego terminado!</strong><br><br>${topPlayer.name} ${topPlayer.icon} ganó con $${topPlayer.money}.<br><br><strong>Ranking Final:</strong><br>${rankingText}`;
+        victoriaModal.style.display = "flex"; // Show modal using flex
+    }
+
+    function updateStatus() {
+      playersStatusDiv.innerHTML = ""; // Clear previous status
+      players.forEach((player, index) => {
+        const div = document.createElement("div");
+        // Added min-w-[150px] for better wrapping on small screens
+        div.className = "playerCard bg-white p-3 rounded-lg shadow border-l-4 min-w-[150px]";
+        div.style.borderLeftColor = getPlayerColor(index); // Use player-specific color for border
+        div.innerHTML = `
+            <div class="flex items-center mb-1">
+                <span class="text-2xl mr-2">${player.icon}</span>
+                <strong class="text-lg">${player.name} ${player.isJailed ? '<span class=\"text-red-600\">(En Cárcel)</span>' : ''}</strong>
+            </div>
+            <div>Dinero: <span class="font-semibold">$${player.money}</span></div>
+            <div>Vueltas: <span class="font-semibold">${player.laps} / 2</span></div>
+            <div class="text-sm text-gray-600 mt-1">Aciertos: ${player.correct} | Errores: ${player.wrong}</div>
+        `;
+        playersStatusDiv.appendChild(div);
+      });
+    }
+
+    function triggerChallenge(player) {
+      // Define challenge questions
+      const questions = [
+         { question: "¿Qué es más importante para la salud financiera a largo plazo?", options: ["Gastar impulsivamente", "Ahorrar e invertir regularmente", "Ignorar las deudas"], correctIndex: 1, reward: 100, penalty: 50 },
+         { question: "¿Cuál de estos NO es un activo?", options: ["Una casa propia", "Acciones de una empresa", "Un préstamo de coche"], correctIndex: 2, reward: 80, penalty: 40 },
+         { question: "Si inviertes $1000 con un interés anual del 5%, ¿cuánto tendrás después de un año (sin contar impuestos)?", options: ["$1005", "$1050", "$1500"], correctIndex: 1, reward: 120, penalty: 60 },
+         { question: "¿Qué significa 'diversificar' tus inversiones?", options: ["Poner todo tu dinero en una sola acción", "No invertir nada", "Distribuir tu dinero en diferentes tipos de inversiones"], correctIndex: 2, reward: 100, penalty: 50 },
+         { question: "¿Para qué sirve un fondo de emergencia?", options: ["Para comprar videojuegos nuevos", "Para cubrir gastos inesperados sin endeudarte", "Para prestarle dinero a amigos"], correctIndex: 1, reward: 90, penalty: 45 }
+      ];
+
+      const questionData = questions[Math.floor(Math.random() * questions.length)];
+
+      questionEl.textContent = questionData.question;
+      optionsEl.innerHTML = ""; // Clear previous options
+
+      questionData.options.forEach((option, index) => {
+        const btn = document.createElement("button");
+        btn.textContent = option;
+        // Use Tailwind classes for styling buttons
+        btn.className = "block w-full text-left bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-2 px-4 border border-blue-300 rounded shadow transition duration-150 ease-in-out";
+        btn.onclick = () => {
+          challengeModal.style.display = "none"; // Hide modal immediately
+          if (index === questionData.correctIndex) {
+            player.money += questionData.reward;
+            player.correct++;
+            showMessage(`${player.name} respondió correctamente y ganó $${questionData.reward}!`, 'success');
+          } else {
+            player.money -= questionData.penalty;
+            player.wrong++;
+            showMessage(`${player.name} respondió mal y perdió $${questionData.penalty}. La respuesta correcta era: ${questionData.options[questionData.correctIndex]}`, 'danger');
+          }
+          updateStatus(); // Update status after challenge result
+          // Proceed to next turn after challenge is answered and message shown
+          setTimeout(() => {
+             nextTurn();
+          }, 1500); // Delay matches other turn transitions
+        };
+        optionsEl.appendChild(btn);
+      });
+
+      challengeModal.style.display = "flex"; // Show modal using flex
+      // Keep dice locked while modal is open (already set in rollDice)
+      // rollButton.disabled = true; // Already disabled
+    }
+
+     function handleSurprise(player) {
+        const surprises = [
+            { message: "¡Encontraste $50 en un bolsillo!", amount: 50, type: 'success' },
+            { message: "¡Recibiste un reembolso inesperado!", amount: 75, type: 'success' },
+            { message: "Error bancario a tu favor.", amount: 100, type: 'success' },
+            { message: "Multa por mal estacionamiento.", amount: -40, type: 'warning' },
+            { message: "Reparación sorpresa del hogar.", amount: -80, type: 'warning' },
+            { message: "¡Te clonaron la tarjeta!", amount: -120, type: 'danger' },
+        ];
+        const surprise = surprises[Math.floor(Math.random() * surprises.length)];
+        player.money += surprise.amount;
+        showMessage(`${player.name}: ${surprise.message} (${surprise.amount > 0 ? '+' : ''}$${surprise.amount})`, surprise.type);
+        
+    }
+
+
+    function showMessage(text, type = 'info') {
+        const msgContainer = document.getElementById('message-container') || createMessageContainer();
+
+        const msgDiv = document.createElement("div");
+        let bgColor = 'bg-blue-500'; // Default info
+        if (type === 'success') bgColor = 'bg-green-500';
+        if (type === 'warning') bgColor = 'bg-yellow-500';
+        if (type === 'danger') bgColor = 'bg-red-500';
+
+        // Added animation classes
+        msgDiv.className = `w-auto max-w-md ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50 mb-2 transition-all duration-300 ease-out opacity-0 transform translate-y-2`;
+        msgDiv.textContent = text;
+
+        // Prepend message to show newest on top
+        msgContainer.prepend(msgDiv);
+
+        // Fade in and slide up animation
+        setTimeout(() => {
+            msgDiv.style.opacity = '1';
+            msgDiv.style.transform = 'translate-y(0)';
+        }, 10);
+
+        // Fade out and remove after delay
+        setTimeout(() => {
+            msgDiv.style.opacity = '0';
+            msgDiv.style.transform = 'translate-y(-10px)'; 
+            setTimeout(() => msgDiv.remove(), 300); 
+        }, 4000); // Message duration (increased slightly)
+    }
+
+    
+    function createMessageContainer() {
+        let container = document.getElementById('message-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'message-container';
+            
+            container.className = 'fixed bottom-5 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-50';
+            document.body.appendChild(container);
+        }
+        return container;
+    }
+
+
+    // --- Event Listeners ---
+    // Ensure startButton exists before adding listener
+    if(startButton) {
+        startButton.addEventListener("click", startGame);
+    } else {
+        console.error("Start game button not found.");
+    }
+    // rollButton listener is added dynamically in renderBoard
+
+    // --- Initial Setup ---
+    renderBoard(); 
+    mostrarPestana('inicio'); 
+    addPlayerInput(); 
+
+  </script>
+</body>
+</html>
