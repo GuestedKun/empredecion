@@ -96,26 +96,26 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center; 
+      justify-content: center; /* Changed from space-around for better control */
       border: 3px solid #3A5A40; 
       border-radius: 8px;
-      padding: 10px;
+      padding: 5px; /* Reduced padding for smaller screens */
       text-align: center;
     }
 
     .game-title-container {
         background-color: #F4EADE; 
-        padding: 8px 18px; 
+        padding: 6px 12px; /* Slightly reduced padding */
         border-radius: 6px; 
         border: 2px solid #3A5A40; 
         box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-        margin-top: 10px; 
-        margin-bottom: 10px; 
+        margin-top: 5px; /* Reduced margin */
+        margin-bottom: 5px; 
         display: inline-block; 
     }
 
     .game-title-main {
-      font-size: 2.2rem; 
+      font-size: 2rem; /* Slightly reduced */
       font-weight: 800;
       color: #D4AF37; 
       text-shadow: 
@@ -132,58 +132,59 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 8px; 
+        gap: 10px; /* Slightly reduced gap */
+        margin-bottom: 5px; 
     }
-    .center-piggybank { font-size: 30px; color: #FF8FAF; }
-    .center-money-bills { font-size: 30px; color: #C1FF72; }
-    .center-growth-chart { font-size: 30px; color: #7AD7F0; }
+    .center-piggybank { font-size: 26px; color: #FF8FAF; } /* Slightly reduced */
+    .center-money-bills { font-size: 26px; color: #C1FF72; } /* Slightly reduced */
+    .center-growth-chart { font-size: 26px; color: #7AD7F0; } /* Slightly reduced */
 
 
     .center-financial-terms {
-        font-size: 0.65rem; 
+        font-size: 0.6rem; /* Slightly reduced */
         font-weight: 600;
         color: #2c3e50; 
-        line-height: 1.3;
+        line-height: 1.2; /* Adjusted line height */
         border: 1px solid #588157; 
-        padding: 4px 8px;
+        padding: 3px 6px; /* Reduced padding */
         border-radius: 5px;
         background-color: rgba(255, 255, 255, 0.6); 
+        margin-bottom: 5px; /* Added margin for spacing */
     }
 
     .center-action-circles {
         display: flex;
-        gap: 8px;
-        margin-bottom: 8px; 
+        gap: 6px; /* Reduced gap */
+        margin-bottom: 5px; 
     }
     .action-circle {
-        width: 30px;
-        height: 30px;
+        width: 26px; /* Slightly reduced */
+        height: 26px; /* Slightly reduced */
         border-radius: 50%;
         background-color: #D4AF37; 
         color: #3A5A40; 
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1rem;
+        font-size: 0.9rem; /* Slightly reduced */
         font-weight: bold;
         box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
     #dice-display { 
-        font-size: 2.2rem; 
+        font-size: 2rem; /* Slightly reduced */
         color: #FFFFFF; 
         text-shadow: 1px 1px 2px #3A5A40;
-        margin-bottom: 5px; 
+        margin-bottom: 3px; /* Reduced margin */
     }
     
     #roll-dice-button {
-        width: 70px; 
-        height: 70px; 
+        width: 65px; /* Slightly reduced */
+        height: 65px; /* Slightly reduced */
         border-radius: 50%; 
         background-color: #D4AF37; 
         color: #3A5A40; 
         font-weight: bold;
-        font-size: 0.9rem; 
+        font-size: 0.85rem; /* Slightly reduced */
         border: 2px solid #3A5A40; 
         display: flex;
         align-items: center;
@@ -193,7 +194,7 @@
         box-shadow: 0 3px 5px rgba(0,0,0,0.2);
         transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out, box-shadow 0.2s ease-in-out;
         cursor: pointer;
-        margin: 5px auto; 
+        margin: 3px auto; /* Reduced margin */
     }
 
     #roll-dice-button:hover:not([disabled]) {
@@ -215,11 +216,12 @@
     }
 
     #roll-result-display { 
-        font-size: 0.9rem; 
+        font-size: 0.85rem; /* Slightly reduced */
         color: #FFFFFF; 
         text-shadow: 1px 1px 1px #3A5A40; 
-        margin-top: 5px; 
+        margin-top: 3px; /* Reduced margin */
         min-height: 1.2em;
+        line-height: 1.2; /* Ensure text fits */
     }
 
     .modal { display: none; }
@@ -233,7 +235,8 @@
     #toggleMusicButton {
         background-color: #588157; 
         color: white;
-        padding: 8px 15px;
+        padding: 6px 12px; /* Reduced padding for mobile */
+        font-size: 0.9rem; /* Reduced font size for mobile */
         border-radius: 20px; 
         font-weight: 600;
         border: 2px solid #3A5A40;
@@ -270,23 +273,28 @@
       .player[data-player-index="2"] { transform: translate(-5px, 5px); }
       .player[data-player-index="3"] { transform: translate(5px, 5px); }
       
-      .game-title-container { padding: 6px 12px; margin-top: 8px; margin-bottom: 8px;}
-      .game-title-main { font-size: 1.5rem; }
+      .game-title-container { padding: 5px 10px; margin-top: 6px; margin-bottom: 6px;} /* Adjusted */
+      .game-title-main { font-size: 1.4rem; } /* Adjusted */
 
-      .center-iconography { gap: 8px; margin-bottom: 6px; }
-      .center-piggybank, .center-money-bills, .center-growth-chart { font-size: 22px; }
-      .center-financial-terms { font-size: 0.55rem; padding: 3px 6px; }
-      .center-action-circles { gap: 6px; margin-bottom: 6px;}
-      .action-circle { width: 22px; height: 22px; font-size: 0.8rem; }
+      .center-iconography { gap: 6px; margin-bottom: 4px; } /* Adjusted */
+      .center-piggybank, .center-money-bills, .center-growth-chart { font-size: 20px; } /* Adjusted */
+      .center-financial-terms { font-size: 0.5rem; padding: 2px 4px; margin-bottom: 4px;} /* Adjusted */
+      .center-action-circles { gap: 5px; margin-bottom: 4px;} /* Adjusted */
+      .action-circle { width: 20px; height: 20px; font-size: 0.7rem; } /* Adjusted */
       
-      #dice-display { font-size: 1.8rem; }
+      #dice-display { font-size: 1.6rem; margin-bottom: 2px; } /* Adjusted */
       #roll-dice-button {
-        width: 60px;
-        height: 60px;
-        font-size: 0.8rem;
+        width: 55px; /* Adjusted */
+        height: 55px; /* Adjusted */
+        font-size: 0.75rem; /* Adjusted */
+        margin: 2px auto; /* Adjusted */
       }
-      #roll-result-display { font-size: 0.8rem; }
-      .center-area { padding: 8px;}
+      #roll-result-display { font-size: 0.75rem; margin-top: 2px;} /* Adjusted */
+      .center-area { padding: 4px;} /* Adjusted */
+
+      /* Player Setup Responsive */
+      #playerSetup .playerNameInput { width: calc(100% - 50px); font-size: 0.9rem; }
+      #playerSetup button { font-size: 0.9rem; padding: 6px 10px; }
     }
      @media (max-width: 480px) {
         .board {
@@ -298,17 +306,26 @@
         .tile-name { font-size: 8px;}
         .tile-subtext { font-size: 7px;}
 
-        .game-title-container { padding: 5px 10px; margin-top: 6px; margin-bottom: 6px;}
-        .game-title-main { font-size: 1.2rem; }
+        .game-title-container { padding: 4px 8px; margin-top: 4px; margin-bottom: 4px;}
+        .game-title-main { font-size: 1.1rem; }
 
-        .center-piggybank, .center-money-bills, .center-growth-chart { font-size: 18px; }
-        .center-financial-terms { font-size: 0.5rem; }
-        .action-circle { width: 18px; height: 18px; font-size: 0.7rem; }
+        .center-iconography { gap: 4px; margin-bottom: 3px; }
+        .center-piggybank, .center-money-bills, .center-growth-chart { font-size: 16px; }
+        .center-financial-terms { font-size: 0.45rem; padding: 2px 3px; margin-bottom: 3px;}
+        .center-action-circles { gap: 4px; margin-bottom: 3px;}
+        .action-circle { width: 16px; height: 16px; font-size: 0.6rem; }
         #roll-dice-button {
-            width: 50px;
-            height: 50px;
-            font-size: 0.7rem;
+            width: 45px;
+            height: 45px;
+            font-size: 0.65rem;
         }
+        #roll-result-display { font-size: 0.7rem;}
+        #toggleMusicButton { padding: 5px 10px; font-size: 0.8rem; }
+
+        /* Player Setup Responsive for very small screens */
+        #playerSetup .playerNameInput { width: calc(100% - 45px); font-size: 0.8rem; }
+        #playerSetup button { font-size: 0.8rem; padding: 5px 8px; }
+        #playerSetup .player-icon-selector { font-size: 1.25rem; }
      }
 
   </style>
@@ -347,7 +364,7 @@
 
     <section id="pestana-juego" style="display:none;">
       <div id="playerSetup" class="bg-white p-5 rounded-lg shadow mb-6 text-center">
-          <h3 class="text-xl font-semibold text-[#3A5A40] mb-3">Configuración de Jugadores</h3>
+          <h3 class="text-xl sm:text-lg font-semibold text-[#3A5A40] mb-3">Configuración de Jugadores</h3>
           <div id="playerInputsContainer" class="mb-4">
               <div class="flex items-center justify-center mb-2">
                   <input type="text" class="playerNameInput border rounded px-3 py-2 mr-2 w-60 focus:outline-none focus:ring-2 focus:ring-green-500" placeholder="Nombre del Jugador 1">
@@ -427,7 +444,7 @@
     const startButton = document.getElementById("startGame");
     const toggleMusicButton = document.getElementById('toggleMusicButton');
     const backgroundMusicPlayer = document.getElementById('backgroundMusicPlayer'); 
-    const diceSoundPlayer = document.getElementById('diceSoundPlayer'); // HTML Audio for dice
+    const diceSoundPlayer = document.getElementById('diceSoundPlayer'); 
 
     let players = [];
     let currentPlayerIndex = 0;
@@ -435,8 +452,7 @@
     let currentIconTarget = null;
     const availableIcons = ['🚗', '🚀', '⛵', '🚲', '🚁', '🛸', '🚂', '🛵', '🚢', '🏎️', '🏍️', '🛴', '💰', '💎', '🎩', '🐶', '🐱', '🤖'];
 
-    // Audio variables
-    let moveSynth; // Only moveSynth from Tone.js
+    let moveSynth; 
     let soundsInitialized = false; 
 
     const tiles = [
@@ -469,22 +485,18 @@
     const totalTiles = tiles.length;
     const START_MONEY = 1000;
 
-    // --- Audio Functions ---
     async function initAudio() {
         if (soundsInitialized) return;
         try {
             await Tone.start(); 
             console.log("Audio Context for SFX started successfully!");
             soundsInitialized = true; 
-
             moveSynth = new Tone.MembraneSynth({
                 pitchDecay: 0.01, octaves: 3, oscillator: { type: "sine" },
                 envelope: { attack: 0.001, decay: 0.15, sustain: 0, release: 0.05 },
                 volume: -15
             }).toDestination();
-
             if (toggleMusicButton) toggleMusicButton.disabled = false;
-
         } catch (e) {
             console.error("Error starting Audio Context for SFX:", e);
             if (toggleMusicButton) toggleMusicButton.disabled = true;
@@ -492,9 +504,8 @@
     }
 
     function playDiceSound() {
-        // Play custom dice sound using HTML audio element
         if (diceSoundPlayer) {
-            diceSoundPlayer.currentTime = 0; // Rewind to start if already playing
+            diceSoundPlayer.currentTime = 0; 
             diceSoundPlayer.play().catch(e => console.error("Error playing dice sound:", e));
         }
     }
@@ -704,7 +715,7 @@
       player.justGotGoBonusThisTurn = false; 
       diceLocked = true; 
       rollButton.disabled = true;
-      playDiceSound(); // Play custom dice sound
+      playDiceSound(); 
       const roll = Math.floor(Math.random() * 6) + 1;
       diceDiv.textContent = `🎲${roll}`;
       resultDiv.textContent = `Avanzando ${roll}...`;
@@ -740,7 +751,6 @@
         }
         updateStatus(); 
         if (tile.type === 'challenge' || tile.type === 'surprise') {
-            // nextTurn() is called within triggerChallenge or after handleSurprise
         } else {
             setTimeout(nextTurn, 1500);
         }
@@ -854,7 +864,7 @@
         if (type === 'success') bgColor = 'bg-green-500';
         if (type === 'warning') bgColor = 'bg-yellow-500 text-black'; 
         if (type === 'danger') bgColor = 'bg-red-500';
-        msgDiv.className = `w-auto max-w-md ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg text-sm z-50 mb-2 transition-all duration-300 ease-out opacity-0 transform translate-y-2`;
+        msgDiv.className = `w-auto max-w-md ${bgColor} text-white px-4 py-2 rounded-lg shadow-lg text-sm z-[101] mb-2 transition-all duration-300 ease-out opacity-0 transform translate-y-2`; // Increased z-index
         msgDiv.textContent = text;
         msgContainer.prepend(msgDiv);
         setTimeout(() => { msgDiv.style.opacity = '1'; msgDiv.style.transform = 'translate-y(0)';}, 10);
